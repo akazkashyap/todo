@@ -1,22 +1,27 @@
-FROM node:20.19.5
+# ----------------------------
+# Stage 1: Build the Vite app
+# ----------------------------
+FROM node:20.19.5 AS build
 
 WORKDIR /app
-
 COPY package*.json ./
-
 RUN npm install
-
 COPY . .
-
-EXPOSE 5173
-
-# Build production assets instead of running dev
 RUN npm run build
 
-RUN npm run serve
 
-# Use a lightweight web server to serve built files
-# FROM nginx:1.25
-# COPY --from=0 /app/dist /usr/share/nginx/html
-# EXPOSE 80
-# CMD ["nginx", "-g", "daemon off;"]
+# ----------------------------
+# Stage 2: Serve with Nginx
+# ----------------------------
+FROM nginx:1.25
+
+# Copy built files to Nginx web root
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# Replace default nginx.conf to use port 8000
+RUN sed -i 's/listen       80;/listen 8000;/' /etc/nginx/conf.d/default.conf
+
+# Expose port 8000
+EXPOSE 8000
+
+CMD ["nginx", "-g", "daemon off;"]
