@@ -2,5 +2,5 @@ import axios from "axios";
 
 
 export const api = axios.create({
-    baseURL: 'http://localhost:8000/todo_api'
+    baseURL: 'http://qch.local/todo_api'
 })
